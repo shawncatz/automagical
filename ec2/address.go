@@ -3,11 +3,18 @@ package ec2
 import (
 	"fmt"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
 func (s *InstanceService) AttachAddress(id, tagName, tagValue string) error {
+	if tagValue == "" {
+		logrus.Infof("%s:%s:%s tagValue is empty", tagName, tagValue, id)
+		return nil
+	}
+
 	address, err := s.FindAddress(id, tagName, tagValue)
 	if err != nil {
 		return err

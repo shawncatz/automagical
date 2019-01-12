@@ -1,0 +1,122 @@
+package ec2_test
+
+import (
+	"context"
+	"encoding/json"
+	"io/ioutil"
+	"testing"
+
+	"github.com/aws/aws-sdk-go/aws"
+	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+
+	"github.com/shawncatz/automagical/ec2"
+	"github.com/shawncatz/automagical/ec2/ec2fakes"
+)
+
+var runningInstance = &awsec2.Instance{
+	State: &awsec2.InstanceState{Name: aws.String("running")},
+	Tags: []*awsec2.Tag{
+		&awsec2.Tag{
+			Key:   aws.String("test"),
+			Value: aws.String("value"),
+		},
+	},
+}
+var taggedInstance = &awsec2.Instance{
+	State: &awsec2.InstanceState{Name: aws.String("running")},
+	Tags: []*awsec2.Tag{
+		&awsec2.Tag{
+			Key:   aws.String("automagical:address"),
+			Value: aws.String("tag-test-1"),
+		},
+	},
+}
+var taggedAddress = &awsec2.Address{
+	AllocationId: aws.String("blarg"),
+	InstanceId:   nil,
+	Tags: []*awsec2.Tag{
+		&awsec2.Tag{
+			Key:   aws.String("automagical:address"),
+			Value: aws.String("tag-test-1"),
+		},
+	},
+}
+
+//func TestHandle(t *testing.T) {
+//	evt := loadEvent("running", t)
+//	ctx := context.Background()
+//	res, err := Handle(evt, ctx)
+//	if err != nil {
+//		t.Errorf("Handle failed: %s", err)
+//	}
+//	if !res {
+//		t.Error("Handle failed.")
+//	}
+//}
+
+func TestHandler_Running(t *testing.T) {
+	evt := loadEvent("running", t)
+	ctx := context.Background()
+
+	s := &ec2fakes.FakeService{}
+	s.WaitReturns(runningInstance, nil)
+
+	h := ec2.NewHandler(evt, ctx, nil, s)
+
+	err := h.Running()
+	if err != nil {
+		t.Errorf("err: %s", err)
+	}
+}
+
+func TestHandler_Running_NotFound(t *testing.T) {
+	evt := loadEvent("running", t)
+	ctx := context.Background()
+
+	s := &ec2fakes.FakeService{}
+
+	h := ec2.NewHandler(evt, ctx, nil, s)
+
+	err := h.Running()
+	if err == nil {
+		t.Errorf("err != nil, should be 'instance not found'")
+	}
+}
+
+func TestHandler_Running_AttachAddress(t *testing.T) {
+	evt := loadEvent("running", t)
+	ctx := context.Background()
+
+	s := &ec2fakes.FakeService{}
+	s.WaitReturns(taggedInstance, nil)
+	s.FindAddressReturns(taggedAddress, nil)
+
+	h := ec2.NewHandler(evt, ctx, nil, s)
+
+	err := h.Running()
+	if err != nil {
+		t.Errorf("err: %s", err)
+	}
+
+	Expect
+}
+
+func TestHandler_Terminated(t *testing.T) {
+
+}
+
+func loadEvent(name string, t *testing.T) ec2.Event {
+	evt := ec2.Event{}
+
+	file, err := ioutil.ReadFile("fixtures/" + name + ".json")
+	if err != nil {
+		t.Error("could not read json file: ", err)
+	}
+
+	err = json.Unmarshal(file, &evt)
+	if err != nil {
+		t.Error("could not unmarshal json: ", err)
+	}
+
+	return evt
+}

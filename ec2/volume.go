@@ -8,6 +8,10 @@ import (
 )
 
 func (s *InstanceService) AttachVolume(id, tagName, tagValue string) error {
+	if tagValue == "" {
+		return nil
+	}
+
 	volume, err := s.FindVolume(id, tagName, tagValue)
 	if err != nil {
 		return err

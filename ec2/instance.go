@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (s *InstanceService) Wait(id string, max, poll time.Duration) (*ec2.Instance, error) {
+func (s *InstanceService) Wait(id string, max, poll time.Duration) (*ec2.Instance, map[string]string, error) {
 	timeout := time.After(max * time.Second)
 	tick := time.Tick(poll * time.Second)
 
@@ -19,7 +19,7 @@ func (s *InstanceService) Wait(id string, max, poll time.Duration) (*ec2.Instanc
 		// Got a timeout! fail with a timeout error
 		case <-timeout:
 			logrus.Errorf("timed out waiting for instance %s", id)
-			return nil, fmt.Errorf("timed out, Name tag not found for %s", id)
+			return nil, nil, fmt.Errorf("timed out, Name tag not found for %s", id)
 		// Got a tick, we should check
 		case <-tick:
 			ins, _ := s.GetInstance(id)
@@ -34,7 +34,9 @@ func (s *InstanceService) Wait(id string, max, poll time.Duration) (*ec2.Instanc
 				continue
 			}
 
-			return ins, nil
+			tags := s.GetTags(ins.Tags)
+
+			return ins, tags, nil
 		}
 	}
 }
@@ -76,7 +78,7 @@ func (s *InstanceService) GetInstanceZone(id string) (string, error) {
 	return *rsp.InstanceStatuses[0].AvailabilityZone, nil
 }
 
-func getTags(raw []*ec2.Tag) map[string]string {
+func (s *InstanceService) GetTags(raw []*ec2.Tag) map[string]string {
 	tags := make(map[string]string)
 
 	for _, t := range raw {

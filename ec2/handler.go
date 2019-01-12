@@ -42,33 +42,44 @@ type Handler struct {
 	event   Event
 	ctx     context.Context
 	config  Config
-	service *InstanceService
+	service Service
+}
+
+func NewHandler(evt Event, ctx context.Context, cfg Config, svc Service) *Handler {
+	if cfg == nil {
+		cfg = NewConfig()
+	}
+	if svc == nil {
+		svc = NewService(evt.Region)
+	}
+	return &Handler{event: evt, ctx: ctx, config: cfg, service: svc}
 }
 
 func (h *Handler) Running() error {
 	id := h.event.Detail.Instance
-	instance, err := h.service.Wait(id, waitMax, waitPoll)
+	errs := false
+
+	instance, tags, err := h.service.Wait(id, waitMax, waitPoll)
 	if err != nil {
 		return err
 	}
+	if instance == nil {
+		return fmt.Errorf("instance not found")
+	}
 
-	tags := getTags(instance.Tags)
-
-	errs := false
-
-	logrus.Infof("%s:%s", tagAddress, h.event.Detail.Instance)
+	logrus.Infof("%s:%s:%s", tagAddress, tags[tagAddress], h.event.Detail.Instance)
 	if err := h.service.AttachAddress(id, tagAddress, tags[tagAddress]); err != nil {
 		logrus.Errorf("%s:%s error %s", tagAddress, h.event.Detail.Instance, err)
 		errs = true
 	}
 
-	logrus.Infof("%s:%s", tagVolume, h.event.Detail.Instance)
+	logrus.Infof("%s:%s:%s", tagVolume, tags[tagVolume], h.event.Detail.Instance)
 	if err := h.service.AttachVolume(id, tagVolume, tags[tagVolume]); err != nil {
 		logrus.Errorf("%s:%s error %s", tagVolume, h.event.Detail.Instance, err)
 		errs = true
 	}
 
-	logrus.Infof("%s:%s", tagRecord, h.event.Detail.Instance)
+	logrus.Infof("%s:%s:%s", tagRecord, tags[tagRecord], h.event.Detail.Instance)
 	if err := h.service.AttachRecord(id, tagRecord, tags[tagRecord]); err != nil {
 		logrus.Errorf("%s:%s error %s", tagRecord, h.event.Detail.Instance, err)
 		errs = true

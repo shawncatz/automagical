@@ -6,6 +6,10 @@ import (
 )
 
 func (s *InstanceService) AttachRecord(id, tagName, tagValue string) error {
+	if tagValue == "" {
+		return nil
+	}
+
 	return nil
 }
 
