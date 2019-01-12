@@ -3,10 +3,12 @@ package ec2
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/route53"
+	"github.com/sirupsen/logrus"
 )
 
 func (s *InstanceService) AttachRecord(id, tagName, tagValue string) error {
 	if tagValue == "" {
+		logrus.Infof("%s:%s:%s tagValue is empty", tagName, tagValue, id)
 		return nil
 	}
 

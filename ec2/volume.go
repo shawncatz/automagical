@@ -5,10 +5,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/sirupsen/logrus"
 )
 
 func (s *InstanceService) AttachVolume(id, tagName, tagValue string) error {
 	if tagValue == "" {
+		logrus.Infof("%s:%s:%s tagValue is empty", tagName, tagValue, id)
 		return nil
 	}
 
