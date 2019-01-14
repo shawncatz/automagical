@@ -2,44 +2,10 @@ package ec2
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/sirupsen/logrus"
 )
-
-func (s *InstanceService) Wait(id string, max, poll time.Duration) (*ec2.Instance, map[string]string, error) {
-	timeout := time.After(max * time.Second)
-	tick := time.Tick(poll * time.Second)
-
-	// Keep trying until we're timed out or got a result or got an error
-	for {
-		select {
-		// Got a timeout! fail with a timeout error
-		case <-timeout:
-			logrus.Errorf("timed out waiting for instance %s", id)
-			return nil, nil, fmt.Errorf("timed out, Name tag not found for %s", id)
-		// Got a tick, we should check
-		case <-tick:
-			ins, _ := s.GetInstance(id)
-			if ins == nil {
-				continue
-			}
-
-			// Wait for the running state, hopefully this means the tags are ready
-			// in the past that wasn't always true
-			// https://docs.aws.amazon.com/cli/latest/reference/ec2/wait/instance-running.html
-			if *ins.State.Name != "running" {
-				continue
-			}
-
-			tags := s.GetTags(ins.Tags)
-
-			return ins, tags, nil
-		}
-	}
-}
 
 func (s *InstanceService) GetInstance(id string) (*ec2.Instance, error) {
 	input := &ec2.DescribeInstancesInput{

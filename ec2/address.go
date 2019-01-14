@@ -5,27 +5,15 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/sirupsen/logrus"
 )
 
-func (s *InstanceService) AttachAddress(id, tagName, tagValue string) error {
-	if tagValue == "" {
-		logrus.Infof("%s:%s:%s tagValue is empty", tagName, tagValue, id)
-		return nil
-	}
-
-	address, err := s.FindAddress(id, tagName, tagValue)
-	if err != nil {
-		return err
-	}
-
+func (s *InstanceService) AttachAddress(instance *ec2.Instance, address *ec2.Address) error {
 	input := &ec2.AssociateAddressInput{
-		InstanceId:   aws.String(id),
+		InstanceId:   instance.InstanceId,
 		AllocationId: address.AllocationId,
 	}
 
-	_, err = s.ec2.AssociateAddress(input)
-	if err != nil {
+	if _, err := s.ec2.AssociateAddress(input); err != nil {
 		return err
 	}
 

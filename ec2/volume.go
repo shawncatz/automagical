@@ -5,28 +5,16 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/sirupsen/logrus"
 )
 
-func (s *InstanceService) AttachVolume(id, tagName, tagValue string) error {
-	if tagValue == "" {
-		logrus.Infof("%s:%s:%s tagValue is empty", tagName, tagValue, id)
-		return nil
-	}
-
-	volume, err := s.FindVolume(id, tagName, tagValue)
-	if err != nil {
-		return err
-	}
-
+func (s *InstanceService) AttachVolume(instance *ec2.Instance, volume *ec2.Volume) error {
 	input := &ec2.AttachVolumeInput{
 		Device:     aws.String("/dev/sdf"),
-		InstanceId: aws.String(id),
+		InstanceId: instance.InstanceId,
 		VolumeId:   aws.String(*volume.VolumeId),
 	}
 
-	_, err = s.ec2.AttachVolume(input)
-	if err != nil {
+	if _, err := s.ec2.AttachVolume(input); err != nil {
 		return err
 	}
 

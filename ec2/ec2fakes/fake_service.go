@@ -3,19 +3,17 @@ package ec2fakes
 
 import (
 	"sync"
-	"time"
 
 	ec2a "github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/shawncatz/automagical/ec2"
 )
 
 type FakeService struct {
-	AttachAddressStub        func(string, string, string) error
+	AttachAddressStub        func(*ec2a.Instance, *ec2a.Address) error
 	attachAddressMutex       sync.RWMutex
 	attachAddressArgsForCall []struct {
-		arg1 string
-		arg2 string
-		arg3 string
+		arg1 *ec2a.Instance
+		arg2 *ec2a.Address
 	}
 	attachAddressReturns struct {
 		result1 error
@@ -36,12 +34,11 @@ type FakeService struct {
 	attachRecordReturnsOnCall map[int]struct {
 		result1 error
 	}
-	AttachVolumeStub        func(string, string, string) error
+	AttachVolumeStub        func(*ec2a.Instance, *ec2a.Volume) error
 	attachVolumeMutex       sync.RWMutex
 	attachVolumeArgsForCall []struct {
-		arg1 string
-		arg2 string
-		arg3 string
+		arg1 *ec2a.Instance
+		arg2 *ec2a.Volume
 	}
 	attachVolumeReturns struct {
 		result1 error
@@ -116,39 +113,21 @@ type FakeService struct {
 	getTagsReturnsOnCall map[int]struct {
 		result1 map[string]string
 	}
-	WaitStub        func(string, time.Duration, time.Duration) (*ec2a.Instance, map[string]string, error)
-	waitMutex       sync.RWMutex
-	waitArgsForCall []struct {
-		arg1 string
-		arg2 time.Duration
-		arg3 time.Duration
-	}
-	waitReturns struct {
-		result1 *ec2a.Instance
-		result2 map[string]string
-		result3 error
-	}
-	waitReturnsOnCall map[int]struct {
-		result1 *ec2a.Instance
-		result2 map[string]string
-		result3 error
-	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeService) AttachAddress(arg1 string, arg2 string, arg3 string) error {
+func (fake *FakeService) AttachAddress(arg1 *ec2a.Instance, arg2 *ec2a.Address) error {
 	fake.attachAddressMutex.Lock()
 	ret, specificReturn := fake.attachAddressReturnsOnCall[len(fake.attachAddressArgsForCall)]
 	fake.attachAddressArgsForCall = append(fake.attachAddressArgsForCall, struct {
-		arg1 string
-		arg2 string
-		arg3 string
-	}{arg1, arg2, arg3})
-	fake.recordInvocation("AttachAddress", []interface{}{arg1, arg2, arg3})
+		arg1 *ec2a.Instance
+		arg2 *ec2a.Address
+	}{arg1, arg2})
+	fake.recordInvocation("AttachAddress", []interface{}{arg1, arg2})
 	fake.attachAddressMutex.Unlock()
 	if fake.AttachAddressStub != nil {
-		return fake.AttachAddressStub(arg1, arg2, arg3)
+		return fake.AttachAddressStub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
@@ -163,17 +142,17 @@ func (fake *FakeService) AttachAddressCallCount() int {
 	return len(fake.attachAddressArgsForCall)
 }
 
-func (fake *FakeService) AttachAddressCalls(stub func(string, string, string) error) {
+func (fake *FakeService) AttachAddressCalls(stub func(*ec2a.Instance, *ec2a.Address) error) {
 	fake.attachAddressMutex.Lock()
 	defer fake.attachAddressMutex.Unlock()
 	fake.AttachAddressStub = stub
 }
 
-func (fake *FakeService) AttachAddressArgsForCall(i int) (string, string, string) {
+func (fake *FakeService) AttachAddressArgsForCall(i int) (*ec2a.Instance, *ec2a.Address) {
 	fake.attachAddressMutex.RLock()
 	defer fake.attachAddressMutex.RUnlock()
 	argsForCall := fake.attachAddressArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeService) AttachAddressReturns(result1 error) {
@@ -261,18 +240,17 @@ func (fake *FakeService) AttachRecordReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeService) AttachVolume(arg1 string, arg2 string, arg3 string) error {
+func (fake *FakeService) AttachVolume(arg1 *ec2a.Instance, arg2 *ec2a.Volume) error {
 	fake.attachVolumeMutex.Lock()
 	ret, specificReturn := fake.attachVolumeReturnsOnCall[len(fake.attachVolumeArgsForCall)]
 	fake.attachVolumeArgsForCall = append(fake.attachVolumeArgsForCall, struct {
-		arg1 string
-		arg2 string
-		arg3 string
-	}{arg1, arg2, arg3})
-	fake.recordInvocation("AttachVolume", []interface{}{arg1, arg2, arg3})
+		arg1 *ec2a.Instance
+		arg2 *ec2a.Volume
+	}{arg1, arg2})
+	fake.recordInvocation("AttachVolume", []interface{}{arg1, arg2})
 	fake.attachVolumeMutex.Unlock()
 	if fake.AttachVolumeStub != nil {
-		return fake.AttachVolumeStub(arg1, arg2, arg3)
+		return fake.AttachVolumeStub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
@@ -287,17 +265,17 @@ func (fake *FakeService) AttachVolumeCallCount() int {
 	return len(fake.attachVolumeArgsForCall)
 }
 
-func (fake *FakeService) AttachVolumeCalls(stub func(string, string, string) error) {
+func (fake *FakeService) AttachVolumeCalls(stub func(*ec2a.Instance, *ec2a.Volume) error) {
 	fake.attachVolumeMutex.Lock()
 	defer fake.attachVolumeMutex.Unlock()
 	fake.AttachVolumeStub = stub
 }
 
-func (fake *FakeService) AttachVolumeArgsForCall(i int) (string, string, string) {
+func (fake *FakeService) AttachVolumeArgsForCall(i int) (*ec2a.Instance, *ec2a.Volume) {
 	fake.attachVolumeMutex.RLock()
 	defer fake.attachVolumeMutex.RUnlock()
 	argsForCall := fake.attachVolumeArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeService) AttachVolumeReturns(result1 error) {
@@ -644,74 +622,6 @@ func (fake *FakeService) GetTagsReturnsOnCall(i int, result1 map[string]string) 
 	}{result1}
 }
 
-func (fake *FakeService) Wait(arg1 string, arg2 time.Duration, arg3 time.Duration) (*ec2a.Instance, map[string]string, error) {
-	fake.waitMutex.Lock()
-	ret, specificReturn := fake.waitReturnsOnCall[len(fake.waitArgsForCall)]
-	fake.waitArgsForCall = append(fake.waitArgsForCall, struct {
-		arg1 string
-		arg2 time.Duration
-		arg3 time.Duration
-	}{arg1, arg2, arg3})
-	fake.recordInvocation("Wait", []interface{}{arg1, arg2, arg3})
-	fake.waitMutex.Unlock()
-	if fake.WaitStub != nil {
-		return fake.WaitStub(arg1, arg2, arg3)
-	}
-	if specificReturn {
-		return ret.result1, ret.result2, ret.result3
-	}
-	fakeReturns := fake.waitReturns
-	return fakeReturns.result1, fakeReturns.result2, fakeReturns.result3
-}
-
-func (fake *FakeService) WaitCallCount() int {
-	fake.waitMutex.RLock()
-	defer fake.waitMutex.RUnlock()
-	return len(fake.waitArgsForCall)
-}
-
-func (fake *FakeService) WaitCalls(stub func(string, time.Duration, time.Duration) (*ec2a.Instance, map[string]string, error)) {
-	fake.waitMutex.Lock()
-	defer fake.waitMutex.Unlock()
-	fake.WaitStub = stub
-}
-
-func (fake *FakeService) WaitArgsForCall(i int) (string, time.Duration, time.Duration) {
-	fake.waitMutex.RLock()
-	defer fake.waitMutex.RUnlock()
-	argsForCall := fake.waitArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
-}
-
-func (fake *FakeService) WaitReturns(result1 *ec2a.Instance, result2 map[string]string, result3 error) {
-	fake.waitMutex.Lock()
-	defer fake.waitMutex.Unlock()
-	fake.WaitStub = nil
-	fake.waitReturns = struct {
-		result1 *ec2a.Instance
-		result2 map[string]string
-		result3 error
-	}{result1, result2, result3}
-}
-
-func (fake *FakeService) WaitReturnsOnCall(i int, result1 *ec2a.Instance, result2 map[string]string, result3 error) {
-	fake.waitMutex.Lock()
-	defer fake.waitMutex.Unlock()
-	fake.WaitStub = nil
-	if fake.waitReturnsOnCall == nil {
-		fake.waitReturnsOnCall = make(map[int]struct {
-			result1 *ec2a.Instance
-			result2 map[string]string
-			result3 error
-		})
-	}
-	fake.waitReturnsOnCall[i] = struct {
-		result1 *ec2a.Instance
-		result2 map[string]string
-		result3 error
-	}{result1, result2, result3}
-}
-
 func (fake *FakeService) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -731,8 +641,6 @@ func (fake *FakeService) Invocations() map[string][][]interface{} {
 	defer fake.getInstanceZoneMutex.RUnlock()
 	fake.getTagsMutex.RLock()
 	defer fake.getTagsMutex.RUnlock()
-	fake.waitMutex.RLock()
-	defer fake.waitMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value
