@@ -78,7 +78,6 @@ var _ = Describe("Handler", func() {
 		It("handles a tagged instance and attaches address", func() {
 			svc.GetInstanceReturns(taggedInstance, nil)
 			svc.GetTagsReturns(map[string]string{"automagical:address": "tag-test-1"})
-			svc.GetTagsReturns(map[string]string{"automagical:address": "tag-test-1"})
 			svc.FindAddressReturns(taggedAddress, nil)
 			svc.AttachAddressReturns(nil)
 
