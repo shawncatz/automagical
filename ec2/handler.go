@@ -15,22 +15,27 @@ type Handler struct {
 	ctx     context.Context
 	config  Config
 	service Service
+	db      Database
 	Poll    time.Duration
 	Max     time.Duration
 }
 
-func NewHandler(evt Event, ctx context.Context, cfg Config, svc Service) *Handler {
+func NewHandler(evt Event, ctx context.Context, cfg Config, svc Service, db Database) *Handler {
 	if cfg == nil {
 		cfg = NewConfig()
 	}
 	if svc == nil {
 		svc = NewService(evt.Region)
 	}
+	if db == nil {
+		db = NewDatabase(cfg["table"])
+	}
 	return &Handler{
 		event:   evt,
 		ctx:     ctx,
 		config:  cfg,
 		service: svc,
+		db:      db,
 		Poll:    waitPoll,
 		Max:     waitMax,
 	}
@@ -45,8 +50,11 @@ func (h *Handler) Running() error {
 	}
 
 	tags := h.service.GetTags(instance.Tags)
-
 	if err := h.Attach(instance, tags); err != nil {
+		return err
+	}
+
+	if err := h.Store(instance); err != nil {
 		return err
 	}
 
@@ -136,8 +144,19 @@ func (h *Handler) AttachRecord(instance *ec2.Instance, tagName, tagValue string)
 	return nil
 }
 
-func (h *Handler) Wait(id string, max, poll time.Duration) (*ec2.Instance, error) {
+func (h *Handler) Store(instance *ec2.Instance) error {
+	return h.db.Insert(instance)
+}
 
+func (h *Handler) Retrieve(id string) (*ec2.Instance, error) {
+	return h.db.Find(id)
+}
+
+func (h *Handler) Remove(id string) error {
+	return h.db.Remove(id)
+}
+
+func (h *Handler) Wait(id string, max, poll time.Duration) (*ec2.Instance, error) {
 	ins, _ := h.service.GetInstance(id)
 	if ins != nil && *ins.State.Name == "running" {
 		return ins, nil

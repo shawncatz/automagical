@@ -23,13 +23,15 @@ var _ = Describe("Handler", func() {
 		running         ec2.Event
 		ctx             context.Context
 		svc             *ec2fakes.FakeService
+		db              *ec2fakes.FakeDatabase
 		handler         *ec2.Handler
 	)
 	BeforeEach(func() {
 		running = loadEvent("running")
 		ctx = context.Background()
 		svc = &ec2fakes.FakeService{}
-		handler = ec2.NewHandler(running, ctx, nil, svc)
+		db = &ec2fakes.FakeDatabase{}
+		handler = ec2.NewHandler(running, ctx, nil, svc, db)
 		handler.Poll = 1
 		handler.Max = 3
 		runningInstance = &awsec2.Instance{

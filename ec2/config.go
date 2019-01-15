@@ -7,11 +7,14 @@ import (
 )
 
 const (
-	configPrefix = "AUTOMAGICAL_INSTANCE"
+	configPrefix = "AUTOMAGICAL_EC2"
 )
 
 var (
-	configKeys = [...]string{"table"}
+	configKeys     = [...]string{"table"}
+	configDefaults = map[string]string{
+		"AUTOMAGICAL_EC2_TABLE": "automagical_ec2",
+	}
 )
 
 type Config map[string]string
@@ -25,5 +28,10 @@ func NewConfig() Config {
 }
 
 func env(name string) string {
-	return os.Getenv(fmt.Sprintf("%s_%s", configPrefix, strings.ToUpper(name)))
+	key := fmt.Sprintf("%s_%s", configPrefix, strings.ToUpper(name))
+	if s := os.Getenv(key); s != "" {
+		return s
+	}
+
+	return configDefaults[key]
 }
