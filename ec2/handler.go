@@ -48,13 +48,11 @@ func (h *Handler) Running() error {
 	if err != nil {
 		return err
 	}
-
-	tags := h.service.GetTags(instance.Tags)
-	if err := h.Attach(instance, tags); err != nil {
+	if err := h.Store(instance); err != nil {
 		return err
 	}
 
-	if err := h.Store(instance); err != nil {
+	if err := h.Attach(instance); err != nil {
 		return err
 	}
 
@@ -62,10 +60,26 @@ func (h *Handler) Running() error {
 }
 
 func (h *Handler) Terminated() error {
+	id := h.event.Detail.Instance
+
+	instance, err := h.Retrieve(id)
+	if err != nil {
+		return err
+	}
+
+	if err := h.Remove(id); err != nil {
+		return err
+	}
+
+	if err := h.Detach(instance); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (h *Handler) Attach(instance *ec2.Instance, tags map[string]string) error {
+func (h *Handler) Attach(instance *ec2.Instance) error {
+	tags := h.service.GetTags(instance.Tags)
 	errs := false
 
 	if err := h.AttachAddress(instance, tagAddress, tags[tagAddress]); err != nil {
@@ -87,6 +101,11 @@ func (h *Handler) Attach(instance *ec2.Instance, tags map[string]string) error {
 		return fmt.Errorf("there were errors when processing attachments")
 	}
 
+	return nil
+}
+
+func (h *Handler) Detach(instance *ec2.Instance) error {
+	// remove records
 	return nil
 }
 

@@ -1,6 +1,7 @@
 package ec2
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -125,6 +126,10 @@ func (d *InstanceDatabase) Find(id string) (*ec2.Instance, error) {
 		return nil, err
 	}
 
+	if len(output.Item) == 0 {
+		return nil, errors.New("not found")
+	}
+
 	decoder := dynamodbattribute.NewDecoder()
 	instance := &ec2.Instance{}
 	err = decoder.Decode(output.Item["Instance"], instance)
@@ -144,7 +149,7 @@ func (d *InstanceDatabase) Remove(id string) error {
 
 	_, err = d.db.DeleteItem(&dynamodb.DeleteItemInput{
 		Key: map[string]*dynamodb.AttributeValue{
-			"InstanceId": av,
+			"InstanceID": av,
 		},
 		TableName: aws.String(d.tableName),
 	})
