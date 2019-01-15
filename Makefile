@@ -7,11 +7,10 @@ build: generate test
 generate:
 	@go generate ./...
 
-test:
-	@go test -v ./...
+test: ginkgo
 
 ginkgo:
-	@ginkgo -cover -nodes=5 ec2
+	@ginkgo -nodes=5 ec2
 
 integration:
-	@ginkgo -nodes=5 ec2/integration
+	@aws-okta exec hub -- ginkgo -nodes=5 ec2/integration
