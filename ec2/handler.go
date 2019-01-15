@@ -48,6 +48,7 @@ func (h *Handler) Running() error {
 	if err != nil {
 		return err
 	}
+
 	if err := h.Store(instance); err != nil {
 		return err
 	}
