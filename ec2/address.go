@@ -41,7 +41,7 @@ func (s *InstanceService) FindAddress(id, tagName, tagValue string) (*ec2.Addres
 	if len(out.Addresses) != 1 {
 		return nil, fmt.Errorf("wrong number of addresses returned (%d) for %s:%s:%s", len(out.Addresses), id, tagName, tagValue)
 	}
-	if *out.Addresses[0].InstanceId != "" {
+	if out.Addresses[0].InstanceId != nil && *out.Addresses[0].InstanceId != "" {
 		return nil, fmt.Errorf("address already attached to %s for %s:%s:%s", *out.Addresses[0].InstanceId, id, tagName, tagValue)
 	}
 

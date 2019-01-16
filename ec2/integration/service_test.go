@@ -14,7 +14,7 @@ var _ = Describe("Service", func() {
 	)
 	BeforeEach(func() {
 		service = ec2.NewService("us-west-2")
-		id = "i-0665bb31b8d6ad04a"
+		id = "i-0f0d055b47b25bc3b"
 	})
 	Context("GetInstance", func() {
 		It("can get instance", func() {
@@ -36,7 +36,23 @@ var _ = Describe("Service", func() {
 			instance, err := service.GetInstance(id)
 			Expect(err).NotTo(HaveOccurred())
 			tags := service.GetTags(instance.Tags)
-			Expect(tags["Name"]).To(Equal("hub-openvpn"))
+			Expect(tags["Name"]).To(Equal("automagical-0"))
+		})
+	})
+	Context("Address", func() {
+		It("can find address", func() {
+			address, err := service.FindAddress(id, "automagical:address", "automagical-address-0")
+			Expect(err).NotTo(HaveOccurred())
+			tags := service.GetTags(address.Tags)
+			Expect(tags["Name"]).To(Equal("automagical-0"))
+		})
+	})
+	Context("Volume", func() {
+		It("can find volume", func() {
+			address, err := service.FindVolume(id, "automagical:volume", "automagical-volume-0")
+			Expect(err).NotTo(HaveOccurred())
+			tags := service.GetTags(address.Tags)
+			Expect(tags["Name"]).To(Equal("automagical-0"))
 		})
 	})
 })

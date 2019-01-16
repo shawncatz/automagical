@@ -38,7 +38,7 @@ release-info:
 	github-release info -u $(GITUSER) -r $(GITREPO)
 
 clean:
-	rm -f $(NAME) $(FILE)
+	rm -f $(NAME) $(NAME)*.zip $(FILE)
 
 generate:
 	@go generate ./...

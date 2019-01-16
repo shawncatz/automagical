@@ -199,14 +199,12 @@ func (h *Handler) Wait(id string, max, poll time.Duration) (*ec2.Instance, error
 				continue
 			}
 
-			// Wait for the running state, hopefully this means the tags are ready
-			// in the past that wasn't always true
+			// Wait for the running state and check automagical tag
 			// https://docs.aws.amazon.com/cli/latest/reference/ec2/wait/instance-running.html
-			if *ins.State.Name != "running" {
-				continue
+			tags := h.service.GetTags(ins.Tags)
+			if *ins.State.Name == "running" && tags["automagical"] == "true" {
+				return ins, nil
 			}
-
-			return ins, nil
 		}
 	}
 }
