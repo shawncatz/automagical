@@ -9,15 +9,15 @@ provider "aws" {
 
 // common setup module
 module "setup" {
-//  source = "github.com/shawncatz/automagical//terraform/setup"
+  // source = "github.com/shawncatz/automagical//terraform/setup"
   source = "../setup"
 }
 
 module "west" {
-//  source = "github.com/shawncatz/automagical//terraform/region"
-  source = "../region"
+  // source = "github.com/shawncatz/automagical//terraform/region"
+  source       = "../region"
   file_version = "${var.version}"
-  role = "${module.setup.role}"
+  role         = "${module.setup.role}"
 }
 
 // for each additonal region you wish to have automagical running,
@@ -38,3 +38,4 @@ module "west" {
 //    aws = "aws.east"
 //  }
 //}
+

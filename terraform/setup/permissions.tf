@@ -17,6 +17,7 @@ resource "aws_iam_policy_attachment" "lambda-dns-attach" {
 data "aws_iam_policy_document" "policy" {
   statement {
     effect = "Allow"
+
     actions = [
       "ec2:Describe*",
       "ec2:CreateNetworkInterface",
@@ -26,8 +27,9 @@ data "aws_iam_policy_document" "policy" {
       "dynamodb:*",
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
-      "logs:PutLogEvents"
+      "logs:PutLogEvents",
     ]
+
     resources = ["*"]
   }
 }
@@ -35,10 +37,12 @@ data "aws_iam_policy_document" "policy" {
 data "aws_iam_policy_document" "role" {
   statement {
     effect = "Allow"
+
     principals {
       identifiers = ["lambda.amazonaws.com"]
       type        = "Service"
     }
+
     actions = ["sts:AssumeRole"]
   }
 }
