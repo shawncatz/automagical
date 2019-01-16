@@ -1,7 +1,3 @@
-provider "aws" {
-  region = "${var.region}"
-}
-
 resource "aws_lambda_function" "automagical" {
   filename          = "${var.file}"
   function_name     = "automagical"
@@ -13,7 +9,6 @@ resource "aws_lambda_function" "automagical" {
 }
 
 resource "aws_lambda_permission" "automagical" {
-  provider      = "aws.west"
   statement_id  = "LambdaDnsAllowExecutionFromCloudWatch"
   action        = "lambda:InvokeFunction"
   function_name = "${aws_lambda_function.automagical.arn}"
@@ -23,14 +18,12 @@ resource "aws_lambda_permission" "automagical" {
 }
 
 resource "aws_cloudwatch_event_rule" "cloudwatch" {
-  provider      = "aws.west"
-  name          = "lambda-dns-rule-west"
+  name          = "lambda-dns-rule"
   description   = "Capture EC2 instance events"
   event_pattern = "${file("${path.module}/rule.json")}"
 }
 
 resource "aws_cloudwatch_event_target" "cloudwatch" {
-  provider  = "aws.west"
   rule      = "${aws_cloudwatch_event_rule.cloudwatch.name}"
   target_id = "lambda-dns-cloudwatch-event"
   arn       = "${aws_lambda_function.automagical.arn}"
