@@ -16,10 +16,8 @@ const (
 	tagAddress = tagName + ":address"
 )
 
-func Handle(evt Event, ctx context.Context) (bool, error) {
-	cfg := NewConfig()
-	svc := NewService(evt.Region)
-	h := &Handler{event: evt, ctx: ctx, config: cfg, service: svc}
+func Handle(ctx context.Context, evt Event) (bool, error) {
+	h := NewHandler(evt, ctx, nil, nil, nil)
 
 	switch evt.Detail.State {
 	case "running":

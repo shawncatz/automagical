@@ -1,41 +1,40 @@
-provider "aws" {
-  region = "us-east-1"
-  alias = "east"
+variable "version" {
+  default = "0.1.3"
 }
 
+// west provider is default
 provider "aws" {
   region = "us-west-2"
-  alias = "west"
 }
 
-variable "version" {
-  default = "0.1.0"
-}
-
-resource "null_resource" "download" {
-  provisioner "local-exec" {
-    command = "wget https://github.com/shawncatz/automagical/releases/download/v${var.version}/automagical-${var.version}.zip"
-  }
-}
-
+// common setup module
 module "setup" {
-  source = "github.com/shawncatz/automagical//terraform/setup"
-}
-
-module "east" {
-  source = "github.com/shawncatz/automagical//terraform/region"
-  file = "./automagical-${var.version}.zip"
-  role = "${module.setup.role}"
-  providers = {
-    aws = "aws.east"
-  }
+//  source = "github.com/shawncatz/automagical//terraform/setup"
+  source = "../setup"
 }
 
 module "west" {
-  source = "github.com/shawncatz/automagical//terraform/region"
-  file = "./automagical-${var.version}.zip"
+//  source = "github.com/shawncatz/automagical//terraform/region"
+  source = "../region"
+  file_version = "${var.version}"
   role = "${module.setup.role}"
-  providers = {
-    aws = "aws.west"
-  }
 }
+
+// for each additonal region you wish to have automagical running,
+// use the region module.
+// Pass your providers down into the module, so the module doesn't
+// have to worry about custom provider configurations (role
+// assumption, etc)
+//provider "aws" {
+//  region = "us-east-1"
+//  alias = "east"
+//}
+//module "east" {
+//  //  source = "github.com/shawncatz/automagical//terraform/region"
+//  source = "../region"
+//  role = "${module.setup.role}"
+//  file_version = "${var.version}"
+//  providers = {
+//    aws = "aws.east"
+//  }
+//}
