@@ -1,17 +1,17 @@
-resource "aws_iam_role" "lambda-dns-role" {
-  name               = "lambda-dns-role"
+resource "aws_iam_role" "role" {
+  name               = "automagical-ec2-role"
   assume_role_policy = "${data.aws_iam_policy_document.role.json}"
 }
 
-resource "aws_iam_policy" "lambda-dns-policy" {
-  name   = "lambda-dns-policy"
+resource "aws_iam_policy" "policy" {
+  name   = "automagical-ec2-policy"
   policy = "${data.aws_iam_policy_document.policy.json}"
 }
 
-resource "aws_iam_policy_attachment" "lambda-dns-attach" {
-  name       = "lambda-dns-attach"
-  roles      = ["${aws_iam_role.lambda-dns-role.name}"]
-  policy_arn = "${aws_iam_policy.lambda-dns-policy.arn}"
+resource "aws_iam_policy_attachment" "attach" {
+  name       = "automagical-ec2-attach"
+  roles      = ["${aws_iam_role.role.name}"]
+  policy_arn = "${aws_iam_policy.policy.arn}"
 }
 
 data "aws_iam_policy_document" "policy" {

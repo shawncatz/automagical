@@ -35,7 +35,7 @@ var _ = Describe("Handler", func() {
 		handler.Poll = 1
 		handler.Max = 3
 		runningInstance = &awsec2.Instance{
-			InstanceId: aws.String("i-06db6eb9ed3ed4db5"),
+			InstanceId: aws.String("i-07ccfadf91ea438a3"),
 			State:      &awsec2.InstanceState{Name: aws.String("running")},
 			Tags: []*awsec2.Tag{
 				&awsec2.Tag{
@@ -45,7 +45,7 @@ var _ = Describe("Handler", func() {
 			},
 		}
 		taggedInstance = &awsec2.Instance{
-			InstanceId: aws.String("i-06db6eb9ed3ed4db5"),
+			InstanceId: aws.String("i-07ccfadf91ea438a3"),
 			State:      &awsec2.InstanceState{Name: aws.String("running")},
 			Tags: []*awsec2.Tag{
 				&awsec2.Tag{
@@ -75,7 +75,7 @@ var _ = Describe("Handler", func() {
 		It("handles a not found instance", func() {
 			err := handler.Running()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).To(Equal("timed out, running instance not found for i-06db6eb9ed3ed4db5"))
+			Expect(err.Error()).To(Equal("timed out, running instance not found for i-07ccfadf91ea438a3"))
 		})
 		It("handles a tagged instance and attaches address", func() {
 			svc.GetInstanceReturns(taggedInstance, nil)
