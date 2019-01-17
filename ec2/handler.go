@@ -83,19 +83,16 @@ func (h *Handler) Attach(instance *ec2.Instance) error {
 	tags := h.service.GetTags(instance.Tags)
 	errs := false
 
-	logrus.Infof("[%s] '%s'='%s'", *instance.InstanceId, tagAddress, tags[tagAddress])
 	if err := h.AttachAddress(instance, tagAddress, tags[tagAddress]); err != nil {
 		logrus.Errorf("[%s] '%s'='%s' error %s", *instance.InstanceId, tagAddress, tags[tagAddress], err)
 		errs = true
 	}
 
-	logrus.Infof("[%s] '%s'='%s'", *instance.InstanceId, tagVolume, tags[tagVolume])
 	if err := h.AttachVolume(instance, tagVolume, tags[tagVolume]); err != nil {
 		logrus.Errorf("[%s] '%s'='%s' error %s", *instance.InstanceId, tagVolume, tags[tagVolume], err)
 		errs = true
 	}
 
-	logrus.Infof("[%s] '%s'='%s'", *instance.InstanceId, tagRecord, tags[tagRecord])
 	if err := h.AttachRecord(instance, tagRecord, tags[tagRecord]); err != nil {
 		logrus.Errorf("[%s] '%s'='%s' error %s", *instance.InstanceId, tagRecord, tags[tagRecord], err)
 		errs = true
@@ -155,14 +152,7 @@ func (h *Handler) AttachRecord(instance *ec2.Instance, tagName, tagValue string)
 		return nil
 	}
 
-	//volume, err := h.service.FindVolume(*instance.InstanceId, tagName, tagValue)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//if err := h.service.AttachVolume(instance, volume); err != nil {
-	//	return err
-	//}
+	// not implemented
 
 	return nil
 }
@@ -180,7 +170,8 @@ func (h *Handler) Remove(id string) error {
 }
 
 func (h *Handler) Wait(id string) (*ec2.Instance, error) {
-	if ins, _ := h.checkInstance(id); ins != nil {
+	// If instance is already up and running, don't poll
+	if ins := h.checkInstance(id); ins != nil {
 		return ins, nil
 	}
 
@@ -196,26 +187,26 @@ func (h *Handler) Wait(id string) (*ec2.Instance, error) {
 			return nil, fmt.Errorf("timed out, running instance not found for %s", id)
 		// Got a tick, we should check
 		case <-tick:
-			if ins, _ := h.checkInstance(id); ins != nil {
+			if ins := h.checkInstance(id); ins != nil {
 				return ins, nil
 			}
 		}
 	}
 }
 
-func (h *Handler) checkInstance(id string) (*ec2.Instance, error) {
+func (h *Handler) checkInstance(id string) *ec2.Instance {
 	ins, _ := h.service.GetInstance(id)
 	if ins == nil {
-		return nil, nil
+		return nil
 	}
 
-	// Wait for the running state and check automagical tag
+	// check automagical tag
 	// https://docs.aws.amazon.com/cli/latest/reference/ec2/wait/instance-running.html
 	tags := h.service.GetTags(ins.Tags)
-	logrus.Infof("(check) [%s] state='%s' automagical='%s'", id, *ins.State.Name, tags["automagical"])
-	if *ins.State.Name == "running" && tags["automagical"] == "true" {
-		return ins, nil
+	//logrus.Infof("(check) [%s] automagical='%s'", id, tags["automagical"])
+	if tags["automagical"] == "true" {
+		return ins
 	}
 
-	return nil, nil
+	return nil
 }

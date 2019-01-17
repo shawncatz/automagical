@@ -1,3 +1,5 @@
+// simple security group
+
 resource "aws_security_group" "automagical" {
   name   = "automagical"
   vpc_id = "${var.vpc_id}"

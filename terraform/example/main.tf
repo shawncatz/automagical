@@ -14,13 +14,15 @@ module "west" {
   source       = "../region"
   file_version = "${var.version}"
   role         = "${module.setup.role}"
+
+  // you can pass in environment variables
+  environment = {
+    "AUTOMAGICAL_VARIABLE" = "value"
+  }
 }
 
 // for each additonal region you wish to have automagical running,
 // use the region module.
-// Pass your providers down into the module, so the module doesn't
-// have to worry about custom provider configurations (role
-// assumption, etc)
 //provider "aws" {
 //  region = "us-east-1"
 //  alias = "east"
@@ -30,6 +32,9 @@ module "west" {
 //  source = "../region"
 //  role = "${module.setup.role}"
 //  file_version = "${var.version}"
+//  // Pass your providers down into the module, so the module doesn't
+//  // have to worry about custom provider configurations (role
+//  // assumption, etc)
 //  providers = {
 //    aws = "aws.east"
 //  }
