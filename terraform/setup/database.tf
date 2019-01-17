@@ -1,4 +1,4 @@
-resource "aws_dynamodb_table" "lambda-dns-table" {
+resource "aws_dynamodb_table" "table" {
   name           = "${var.table_name}"
   read_capacity  = "${var.read_capacity}"
   write_capacity = "${var.write_capacity}"

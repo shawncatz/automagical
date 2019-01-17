@@ -1,7 +1,3 @@
-variable "version" {
-  default = "0.1.3"
-}
-
 // west provider is default
 provider "aws" {
   region = "us-west-2"

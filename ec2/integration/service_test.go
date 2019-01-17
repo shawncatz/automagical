@@ -14,7 +14,7 @@ var _ = Describe("Service", func() {
 	)
 	BeforeEach(func() {
 		service = ec2.NewService("us-west-2")
-		id = "i-0f0d055b47b25bc3b"
+		id = "i-0e7ff40a73e814cb8"
 	})
 	Context("GetInstance", func() {
 		It("can get instance", func() {

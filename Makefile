@@ -49,7 +49,7 @@ ginkgo:
 	@ginkgo -nodes=5 ec2
 
 integration:
-	@aws-okta exec hub -- ginkgo -nodes=5 ec2/integration
+	@aws-okta exec hub -- ginkgo -focus=Running -nodes=5 ec2/integration
 
 deps:
 	go get -u github.com/aktau/github-release

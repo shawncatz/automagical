@@ -8,10 +8,10 @@
   "region": "us-west-2",
   "test": true,
   "resources": [
-    "arn:aws:ec2:us-east-1:111122223333:instance/i-06db6eb9ed3ed4db5"
+    "arn:aws:ec2:us-east-1:111122223333:instance/i-07ccfadf91ea438a3"
   ],
   "detail": {
-    "instance-id": "i-06db6eb9ed3ed4db5",
+    "instance-id": "i-07ccfadf91ea438a3",
     "state": "running"
   }
 }
