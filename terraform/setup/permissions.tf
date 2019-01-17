@@ -19,10 +19,7 @@ data "aws_iam_policy_document" "policy" {
     effect = "Allow"
 
     actions = [
-      "ec2:Describe*",
-      "ec2:CreateNetworkInterface",
-      "ec2:DescribeNetworkInterfaces",
-      "ec2:DeleteNetworkInterface",
+      "ec2:*",
       "route53:*",
       "dynamodb:*",
       "logs:CreateLogGroup",
