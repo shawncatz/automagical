@@ -44,7 +44,7 @@ func NewHandler(evt Event, ctx context.Context, cfg Config, svc Service, db Data
 func (h *Handler) Running() error {
 	id := h.event.Detail.Instance
 
-	instance, err := h.Wait(id, waitMax, waitPoll)
+	instance, err := h.Wait(id)
 	if err != nil {
 		return err
 	}
@@ -83,18 +83,21 @@ func (h *Handler) Attach(instance *ec2.Instance) error {
 	tags := h.service.GetTags(instance.Tags)
 	errs := false
 
+	logrus.Infof("[%s] '%s'='%s'", *instance.InstanceId, tagAddress, tags[tagAddress])
 	if err := h.AttachAddress(instance, tagAddress, tags[tagAddress]); err != nil {
-		logrus.Errorf("%s:%s:%s error %s", *instance.InstanceId, tagAddress, tags[tagAddress], err)
+		logrus.Errorf("[%s] '%s'='%s' error %s", *instance.InstanceId, tagAddress, tags[tagAddress], err)
 		errs = true
 	}
 
+	logrus.Infof("[%s] '%s'='%s'", *instance.InstanceId, tagVolume, tags[tagVolume])
 	if err := h.AttachVolume(instance, tagVolume, tags[tagVolume]); err != nil {
-		logrus.Errorf("%s:%s:%s error %s", *instance.InstanceId, tagVolume, tags[tagVolume], err)
+		logrus.Errorf("[%s] '%s'='%s' error %s", *instance.InstanceId, tagVolume, tags[tagVolume], err)
 		errs = true
 	}
 
+	logrus.Infof("[%s] '%s'='%s'", *instance.InstanceId, tagRecord, tags[tagRecord])
 	if err := h.AttachRecord(instance, tagRecord, tags[tagRecord]); err != nil {
-		logrus.Errorf("%s:%s:%s error %s", *instance.InstanceId, tagRecord, tags[tagRecord], err)
+		logrus.Errorf("[%s] '%s'='%s' error %s", *instance.InstanceId, tagRecord, tags[tagRecord], err)
 		errs = true
 	}
 
@@ -176,9 +179,8 @@ func (h *Handler) Remove(id string) error {
 	return h.db.Remove(id)
 }
 
-func (h *Handler) Wait(id string, max, poll time.Duration) (*ec2.Instance, error) {
-	ins, _ := h.service.GetInstance(id)
-	if ins != nil && *ins.State.Name == "running" {
+func (h *Handler) Wait(id string) (*ec2.Instance, error) {
+	if ins, _ := h.checkInstance(id); ins != nil {
 		return ins, nil
 	}
 
@@ -190,21 +192,30 @@ func (h *Handler) Wait(id string, max, poll time.Duration) (*ec2.Instance, error
 		select {
 		// Got a timeout! fail with a timeout error
 		case <-timeout:
-			logrus.Errorf("timed out waiting for instance %s", id)
+			logrus.Errorf("timed out waiting for instance %s (%d / %d)", id, h.Poll, h.Max)
 			return nil, fmt.Errorf("timed out, running instance not found for %s", id)
 		// Got a tick, we should check
 		case <-tick:
-			ins, _ := h.service.GetInstance(id)
-			if ins == nil {
-				continue
-			}
-
-			// Wait for the running state and check automagical tag
-			// https://docs.aws.amazon.com/cli/latest/reference/ec2/wait/instance-running.html
-			tags := h.service.GetTags(ins.Tags)
-			if *ins.State.Name == "running" && tags["automagical"] == "true" {
+			if ins, _ := h.checkInstance(id); ins != nil {
 				return ins, nil
 			}
 		}
 	}
+}
+
+func (h *Handler) checkInstance(id string) (*ec2.Instance, error) {
+	ins, _ := h.service.GetInstance(id)
+	if ins == nil {
+		return nil, nil
+	}
+
+	// Wait for the running state and check automagical tag
+	// https://docs.aws.amazon.com/cli/latest/reference/ec2/wait/instance-running.html
+	tags := h.service.GetTags(ins.Tags)
+	logrus.Infof("(check) [%s] state='%s' automagical='%s'", id, *ins.State.Name, tags["automagical"])
+	if *ins.State.Name == "running" && tags["automagical"] == "true" {
+		return ins, nil
+	}
+
+	return nil, nil
 }

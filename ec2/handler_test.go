@@ -21,31 +21,35 @@ var _ = Describe("Handler", func() {
 		taggedInstance  *awsec2.Instance
 		taggedAddress   *awsec2.Address
 		running         ec2.Event
-		ctx             context.Context
 		svc             *ec2fakes.FakeService
 		db              *ec2fakes.FakeDatabase
 		handler         *ec2.Handler
+		id              string
 	)
 	BeforeEach(func() {
-		running = loadEvent("running")
-		ctx = context.Background()
+		id = "i-0123456789abcdef0"
+		running = loadEvent("running", id)
 		svc = &ec2fakes.FakeService{}
 		db = &ec2fakes.FakeDatabase{}
-		handler = ec2.NewHandler(running, ctx, nil, svc, db)
+		handler = ec2.NewHandler(running, context.Background(), nil, svc, db)
 		handler.Poll = 1
 		handler.Max = 3
 		runningInstance = &awsec2.Instance{
-			InstanceId: aws.String("i-07ccfadf91ea438a3"),
+			InstanceId: aws.String(id),
 			State:      &awsec2.InstanceState{Name: aws.String("running")},
 			Tags: []*awsec2.Tag{
 				&awsec2.Tag{
 					Key:   aws.String("test"),
 					Value: aws.String("value"),
 				},
+				&awsec2.Tag{
+					Key:   aws.String("automagical"),
+					Value: aws.String("true"),
+				},
 			},
 		}
 		taggedInstance = &awsec2.Instance{
-			InstanceId: aws.String("i-07ccfadf91ea438a3"),
+			InstanceId: aws.String(id),
 			State:      &awsec2.InstanceState{Name: aws.String("running")},
 			Tags: []*awsec2.Tag{
 				&awsec2.Tag{
@@ -68,6 +72,16 @@ var _ = Describe("Handler", func() {
 	Context("Running events", func() {
 		It("handles a found instance", func() {
 			svc.GetInstanceReturns(runningInstance, nil)
+			svc.GetTagsReturns(map[string]string{"automagical": "true"})
+
+			err := handler.Running()
+			Expect(err).ShouldNot(HaveOccurred())
+		})
+		It("handles waiting for an instance", func() {
+			svc.GetInstanceReturns(runningInstance, nil)
+			svc.GetTagsReturnsOnCall(0, nil)
+			svc.GetTagsReturnsOnCall(1, nil)
+			svc.GetTagsReturnsOnCall(2, map[string]string{"automagical": "true"})
 
 			err := handler.Running()
 			Expect(err).ShouldNot(HaveOccurred())
@@ -75,11 +89,11 @@ var _ = Describe("Handler", func() {
 		It("handles a not found instance", func() {
 			err := handler.Running()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).To(Equal("timed out, running instance not found for i-07ccfadf91ea438a3"))
+			Expect(err.Error()).To(Equal("timed out, running instance not found for " + id))
 		})
 		It("handles a tagged instance and attaches address", func() {
 			svc.GetInstanceReturns(taggedInstance, nil)
-			svc.GetTagsReturns(map[string]string{"automagical:address": "tag-test-1"})
+			svc.GetTagsReturns(map[string]string{"automagical:address": "tag-test-1", "automagical": "true"})
 			svc.FindAddressReturns(taggedAddress, nil)
 			svc.AttachAddressReturns(nil)
 
@@ -91,7 +105,7 @@ var _ = Describe("Handler", func() {
 	})
 })
 
-func loadEvent(name string) ec2.Event {
+func loadEvent(name string, id string) ec2.Event {
 	evt := ec2.Event{}
 
 	file, err := ioutil.ReadFile("fixtures/" + name + ".json")
@@ -106,5 +120,6 @@ func loadEvent(name string) ec2.Event {
 		return evt
 	}
 
+	evt.Detail.Instance = id
 	return evt
 }
