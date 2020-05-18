@@ -53,7 +53,7 @@ var _ = Describe("Handler", func() {
 			State:      &awsec2.InstanceState{Name: aws.String("running")},
 			Tags: []*awsec2.Tag{
 				&awsec2.Tag{
-					Key:   aws.String("automagical:address"),
+					Key:   aws.String("automagical-address"),
 					Value: aws.String("tag-test-1"),
 				},
 			},
@@ -63,7 +63,7 @@ var _ = Describe("Handler", func() {
 			InstanceId:   nil,
 			Tags: []*awsec2.Tag{
 				&awsec2.Tag{
-					Key:   aws.String("automagical:address"),
+					Key:   aws.String("automagical-address"),
 					Value: aws.String("tag-test-1"),
 				},
 			},
@@ -93,7 +93,7 @@ var _ = Describe("Handler", func() {
 		})
 		It("handles a tagged instance and attaches address", func() {
 			svc.GetInstanceReturns(taggedInstance, nil)
-			svc.GetTagsReturns(map[string]string{"automagical:address": "tag-test-1", "automagical": "true"})
+			svc.GetTagsReturns(map[string]string{"automagical-address": "tag-test-1", "automagical": "true"})
 			svc.FindAddressReturns(taggedAddress, nil)
 			svc.AttachAddressReturns(nil)
 

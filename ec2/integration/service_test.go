@@ -41,7 +41,7 @@ var _ = Describe("Service", func() {
 	})
 	Context("Address", func() {
 		It("can find address", func() {
-			address, err := service.FindAddress(id, "automagical:address", "automagical-address-0")
+			address, err := service.FindAddress(id, "automagical-address", "automagical-address-0")
 			Expect(err).NotTo(HaveOccurred())
 			tags := service.GetTags(address.Tags)
 			Expect(tags["Name"]).To(Equal("automagical-0"))
@@ -49,7 +49,7 @@ var _ = Describe("Service", func() {
 	})
 	Context("Volume", func() {
 		It("can find volume", func() {
-			address, err := service.FindVolume(id, "automagical:volume", "automagical-volume-0")
+			address, err := service.FindVolume(id, "automagical-volume", "automagical-volume-0")
 			Expect(err).NotTo(HaveOccurred())
 			tags := service.GetTags(address.Tags)
 			Expect(tags["Name"]).To(Equal("automagical-0"))

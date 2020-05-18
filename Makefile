@@ -4,9 +4,11 @@ FILE ?= $(NAME)-$(VERSION).zip
 GITUSER ?= shawncatz
 GITREPO ?= automagical
 
+test: generate ginkgo
+
 all: build
 
-build: generate test $(NAME) $(FILE)
+build: test $(NAME) $(FILE)
 
 $(NAME):
 	@GOOS=linux go build -o $(NAME)
@@ -42,8 +44,6 @@ clean:
 
 generate:
 	@go generate ./...
-
-test: ginkgo
 
 ginkgo:
 	@ginkgo -nodes=5 ec2

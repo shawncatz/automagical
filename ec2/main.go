@@ -11,9 +11,9 @@ const (
 	waitMax    = 50
 	waitPoll   = 2
 	tagName    = "automagical"
-	tagVolume  = tagName + ":volume"
-	tagRecord  = tagName + ":record"
-	tagAddress = tagName + ":address"
+	tagVolume  = tagName + "-volume"
+	tagRecord  = tagName + "-record"
+	tagAddress = tagName + "-address"
 )
 
 func Handle(ctx context.Context, evt Event) (bool, error) {
