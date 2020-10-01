@@ -6,12 +6,12 @@ provider "aws" {
 // common setup module
 module "setup" {
   // source = "github.com/shawncatz/automagical//terraform/setup"
-  source = "../setup"
+  source = "../setupp"
 }
 
 module "west" {
   // source = "github.com/shawncatz/automagical//terraform/region"
-  source       = "../region"
+  source       = "../regionn"
   file_version = "${var.version}"
   role         = "${module.setup.role}"
 
